@@ -12,7 +12,7 @@ X_train, y_train, X_test, y_test = load_ucr_dataset(
 X_train_scaled, X_test_scaled = normalize_with_sklearn(X_train, X_test)
 
 #  Initialiser et entraîner le modèle
-lts = LearningTimeSeriesShapelets(K=0.3, L_min=0.2, R=3, max_iter=5000)
+lts = LearningTimeSeriesShapelets(K=0.3, L_min=0.2, R=3, max_iter=50)
 lts.fit(X_train_scaled, y_train)
 
 # Évaluer le modèle
