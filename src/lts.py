@@ -65,16 +65,22 @@ class LearningTimeSeriesShapelets:
             Approximation soft-min
         """
         # Éviter les overflow numériques
-        D_max = np.max(D)
-        exp_terms = np.exp(self.alpha * (D - D_max))
+        # D_max = np.max(D)
+        # exp_terms = np.exp(self.alpha * (D - D_max))
         
-        numerator = np.sum(D * exp_terms)
-        denominator = np.sum(exp_terms)
+        # numerator = np.sum(D * exp_terms)
+        # denominator = np.sum(exp_terms)
         
-        if denominator == 0:
-            return np.min(D)
+        # if denominator == 0:
+        #     return np.min(D)
         
-        return numerator / denominator
+        # return numerator / denominator
+        m = np.min(D)
+        ex = np.exp(self.alpha * (D - m))
+        den = np.sum(ex)
+        if den == 0:
+            return m
+        return np.sum(D * ex) / den
     
     def _compute_distances(self, series, shapelets, L):
         """
@@ -289,7 +295,7 @@ class LearningTimeSeriesShapelets:
         # Gradient pour W0
         dW0 = -error
         
-        # Gradient pour S (simplifié)
+        # Gradient pour S 
         dS = np.zeros_like(self.S)
         
         for r in range(R):
@@ -303,7 +309,8 @@ class LearningTimeSeriesShapelets:
             for k in range(K):
                 # Calculer les poids exponentiels pour soft-min
                 D_k = D_r[k]
-                exp_terms = np.exp(self.alpha * D_k)
+                m = np.min(D_k)
+                exp_terms = np.exp(self.alpha * (D_k - m))
                 sum_exp = np.sum(exp_terms)
                 
                 if sum_exp == 0:
@@ -311,7 +318,7 @@ class LearningTimeSeriesShapelets:
                 
                 # Gradient du soft-min par rapport à D (Eq. 23 simplifié)
                 soft_min_val = M[r, k]
-                weights = exp_terms / sum_exp
+                weights = (exp_terms / sum_exp)*(1 + self.alpha * (D_k - soft_min_val))
                 
                 for j in range(J_r):
                     # Terme principal
@@ -325,7 +332,7 @@ class LearningTimeSeriesShapelets:
                     # Contribution totale (ranger dans les premiers L_r éléments)
                     dS[r, k, :L_r] += -error * self.W[c, r, k] * weight_j * dD_dS_seg
         
-        return dS, dW, dW0
+        return dS, dW, dW0, y_pred
     
     def fit(self, X, y):
         """
@@ -352,11 +359,14 @@ class LearningTimeSeriesShapelets:
             class_idx = np.where(self.classes_ == label)[0][0]
             y_binary[i, class_idx] = 1
         
+        self.loss_history = []
+
         print(f"Début de l'entraînement: I={I}, Q={Q}, C={C}")
         print(f"Taille des shapelets: {self.S.shape}")
         
         # Entraînement par descente de gradient stochastique
         for iteration in tqdm(range(self.max_iter), desc="Entraînement"):
+            total_loss = 0.0
             # Parcourir toutes les instances
             for i in range(I):
                 X_i = X[i]
@@ -366,12 +376,21 @@ class LearningTimeSeriesShapelets:
                     y_i_b = y_binary[i, c]
                     
                     # Calculer les gradients
-                    dS, dW, dW0 = self._compute_gradients(X_i, y_i_b, c)
+                    dS, dW, dW0, y_pred = self._compute_gradients(X_i, y_i_b, c)
+
+                    # ---- perte  ----
+                    p = expit(y_pred)
+                    eps = 1e-12
+                    loss_instance = -(y_i_b * np.log(p + eps) + (1 - y_i_b) * np.log(1 - p + eps))
+                    total_loss += loss_instance
                     
                     # Mettre à jour les paramètres
                     self.S -= self.learning_rate * dS
                     self.W[c] -= self.learning_rate * dW
                     self.W0[c] -= self.learning_rate * dW0
+            
+            # moyenne par (I*C)
+            self.loss_history.append(total_loss / (I * C))
             
             # Réduction du learning rate
             if iteration % 1000 == 0 and iteration > 0:
