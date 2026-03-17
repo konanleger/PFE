@@ -26,7 +26,7 @@ PAPER_CFG = dict(
     R=3,
     lambda_w=0.01,
     learning_rate=0.01,
-    max_iter=500,     # paper setting (adjust if too slow)
+    max_iter=500,     # paper setting
     alpha=-100
 )
 
