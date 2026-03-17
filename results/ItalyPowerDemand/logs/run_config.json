@@ -1,0 +1,25 @@
+{
+  "seed": 42,
+  "dataset": {
+    "name": "ItalyPowerDemand",
+    "train_path": "data/ItalyPowerDemand_TRAIN",
+    "test_path": "data/ItalyPowerDemand_TEST"
+  },
+  "paper_cfg": {
+    "K": 0.3,
+    "L_min": 0.2,
+    "R": 3,
+    "lambda_w": 0.01,
+    "learning_rate": 0.01,
+    "max_iter": 50,
+    "alpha": -100
+  },
+  "iter_values": [
+    20,
+    50
+  ],
+  "fractions": [
+    0.1,
+    0.3
+  ]
+}
