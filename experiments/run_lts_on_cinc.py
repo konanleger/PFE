@@ -15,7 +15,7 @@ X_train, y_train, X_test, y_test = load_ucr_dataset(
 X_train_scaled, X_test_scaled = normalize_with_sklearn(X_train, X_test)
 
 #  Initialiser et entraîner le modèle
-lts = LearningTimeSeriesShapelets(K=0.3, L_min=0.2, R=3, max_iter=20)
+lts = LearningTimeSeriesShapelets(K=0.3, L_min=0.2, R=3, max_iter=200)
 lts.fit(X_train_scaled, y_train)
 
 # Évaluer le modèle
@@ -179,7 +179,7 @@ plt.savefig("results/training_loss.png", dpi=300)
 plt.show()
 
 ### Étude de sensibilité aux hyperparamètres
-Ks = [0.1, 0.2, 0.3, 0.4]
+Ks = [0.2, 0.3]
 results = []
 
 for k_val in Ks:
@@ -198,7 +198,7 @@ plt.show()
 
 # Étude de la taille d’apprentissage
 
-fractions = [0.3, 0.5, 0.7, 1.0]
+fractions = [0.3, 0.5]
 acc_train_size = []
 
 for frac in fractions:
