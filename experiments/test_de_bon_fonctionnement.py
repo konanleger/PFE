@@ -95,7 +95,7 @@ assert lts.L_min_len is not None, "L_min_len non initialisé"
 print("[OK] _initialize_shapelets fonctionne")
 
 # --------------------------------------------------
-# 4) Test _compute_distances
+# Test _compute_distances
 # --------------------------------------------------
 print("\n--- Test _compute_distances ---")
 series0 = X_train_scaled[0]
@@ -112,7 +112,7 @@ assert np.all(np.isfinite(distances)), "Distances non finies"
 print("[OK] _compute_distances fonctionne")
 
 # --------------------------------------------------
-# 5) Test _compute_gradients
+# Test _compute_gradients
 # --------------------------------------------------
 print("\n--- Test _compute_gradients ---")
 # Construire y_binary comme dans fit
@@ -146,7 +146,7 @@ assert np.isfinite(y_pred), "y_pred non fini"
 print("[OK] _compute_gradients fonctionne")
 
 # --------------------------------------------------
-# 6) Test fit
+# Test fit
 # --------------------------------------------------
 print("\n--- Test fit ---")
 lts_fit = LearningTimeSeriesShapelets(
@@ -178,7 +178,7 @@ print("loss_history (5 premières valeurs) :", lts_fit.loss_history[:5])
 print("[OK] fit fonctionne")
 
 # --------------------------------------------------
-# 7) Test predict_proba
+# Test predict_proba
 # --------------------------------------------------
 print("\n--- Test predict_proba ---")
 probas = lts_fit.predict_proba(X_test_scaled[:10])
@@ -192,7 +192,7 @@ assert np.allclose(probas.sum(axis=1), 1, atol=1e-5), "Les probabilités ne somm
 print("[OK] predict_proba fonctionne")
 
 # --------------------------------------------------
-# 8) Test predict
+# Test predict
 # --------------------------------------------------
 print("\n--- Test predict ---")
 y_pred_test = lts_fit.predict(X_test_scaled[:20])
@@ -205,7 +205,7 @@ assert np.all(np.isin(y_pred_test, lts_fit.classes_)), "predict retourne des lab
 print("[OK] predict fonctionne")
 
 # --------------------------------------------------
-# 9) Test transform
+# Test transform
 # --------------------------------------------------
 print("\n--- Test transform ---")
 X_transformed = lts_fit.transform(X_test_scaled[:10])
@@ -259,7 +259,7 @@ assert n_changed > 0, "Aucun shapelet n'a été modifié"
 print("[OK] Plusieurs shapelets ont été modifiés pendant l'entraînement")
 
 # --------------------------------------------------
-# 10) Petit test global de performance
+# Petit test global de performance
 # --------------------------------------------------
 print("\n--- Test global pipeline ---")
 y_pred_full = lts_fit.predict(X_test_scaled)

@@ -16,7 +16,7 @@ from src.utils import load_ucr_dataset, normalize_with_sklearn
 
 
 # =========================================================
-# 1. CONFIGURATION
+# CONFIGURATION
 # =========================================================
 SEED = 42
 np.random.seed(SEED)
@@ -28,7 +28,7 @@ PAPER_CFG = dict(
     R=3,
     lambda_w=0.01,
     learning_rate=0.01,
-    max_iter=50,   # mettez 5000 si votre implémentation le supporte en temps
+    max_iter=1000,   # mettez 5000 si votre implémentation le supporte en temps
     alpha=-100
 )
 
@@ -48,7 +48,7 @@ for d in [OUTDIR, FIGDIR, TABDIR, LOGDIR]:
 
 
 # =========================================================
-# 2. FONCTIONS UTILITAIRES
+# FONCTIONS UTILITAIRES
 # =========================================================
 def save_confusion(y_true, y_pred, title, filename):
     cm = confusion_matrix(y_true, y_pred)
@@ -190,7 +190,7 @@ def plot_best_shapelet_alignment(lts_model, X, filename):
     L_r = (r + 1) * lts_model.L_min_len
     best_shapelet = lts_model.S[r, k, :L_r]
 
-    # choisir une série test arbitraire (ici la première)
+    # choisir une série test arbitraire 
     series = X[0]
     pos = find_best_match(series, best_shapelet)
 
@@ -226,7 +226,7 @@ def run_lts(X_train, y_train, X_test, y_test, cfg):
 
 
 # =========================================================
-# 3. CHARGEMENT DES DONNÉES
+# CHARGEMENT DES DONNÉES
 # =========================================================
 X_train, y_train, X_test, y_test = load_ucr_dataset(
     DATASET["train_path"],
@@ -253,7 +253,7 @@ save_series_by_class(
 )
 
 # =========================================================
-# 4. BASELINES
+# BASELINES
 # =========================================================
 results = []
 
@@ -298,7 +298,7 @@ save_confusion(
 )
 
 # =========================================================
-# 5. LTS (CONFIG FIXE PAPIER)
+# LTS (CONFIG FIXE PAPIER)
 # =========================================================
 lts, pred_lts, acc_lts, time_lts = run_lts(
     X_train_scaled, y_train,
@@ -337,7 +337,7 @@ plot_best_shapelet_alignment(
 )
 
 # =========================================================
-# 6. LTS TRANSFORM + LOGISTIC REGRESSION
+# LTS TRANSFORM + LOGISTIC REGRESSION
 # =========================================================
 Xtr_lts = lts.transform(X_train_scaled)
 Xte_lts = lts.transform(X_test_scaled)
@@ -345,7 +345,7 @@ Xte_lts = lts.transform(X_test_scaled)
 Xtr_lts = np.nan_to_num(Xtr_lts, nan=np.nanmean(Xtr_lts))
 Xte_lts = np.nan_to_num(Xte_lts, nan=np.nanmean(Xte_lts))
 
-logreg = LogisticRegression(max_iter=500)
+logreg = LogisticRegression(max_iter=1000)
 start = time.time()
 logreg.fit(Xtr_lts, y_train)
 pred_lr = logreg.predict(Xte_lts)
@@ -365,9 +365,9 @@ save_confusion(
 )
 
 # =========================================================
-# 7. ÉTUDE DE CONVERGENCE EN NOMBRE D'ITÉRATIONS
+# ÉTUDE DE CONVERGENCE EN NOMBRE D'ITÉRATIONS
 # =========================================================
-iter_values = [20, 50]
+iter_values = [200, 500, 1000]
 acc_iter = []
 
 for it in iter_values:
@@ -388,7 +388,7 @@ plot_accuracy_vs_iterations(
 )
 
 # =========================================================
-# 8. ÉTUDE DE LA TAILLE D'APPRENTISSAGE
+# ÉTUDE DE LA TAILLE D'APPRENTISSAGE
 # =========================================================
 fractions = [0.1, 0.3]
 acc_fraction = []
@@ -410,7 +410,7 @@ plot_accuracy_vs_train_fraction(
 )
 
 # =========================================================
-# 9. SAUVEGARDE DES RÉSULTATS
+# SAUVEGARDE DES RÉSULTATS
 # =========================================================
 results_df = pd.DataFrame(results).sort_values("accuracy", ascending=False)
 
