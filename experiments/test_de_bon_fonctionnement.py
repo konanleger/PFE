@@ -278,7 +278,3 @@ plt.xlabel("Predicted")
 plt.ylabel("True")
 plt.tight_layout()
 plt.show()
-
-print("\n" + "=" * 70)
-print("TOUS LES TESTS SONT TERMINÉS")
-print("=" * 70)
