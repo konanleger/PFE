@@ -21,18 +21,18 @@ SEED = 42
 np.random.seed(SEED)
 
 PAPER_CFG = dict(
-    K=0.3,
-    L_min=0.2,
-    R=3,
+    K=0.15,
+    L_min=0.125,
+    R=2,
     lambda_w=0.01,
     learning_rate=0.01,
-    max_iter=2000,   
+    max_iter=100,   
     alpha=-100
 )
 
-DATASET_NAME = "ItalyPowerDemand"
-TRAIN_PATH = "data/ItalyPowerDemand_TRAIN"
-TEST_PATH = "data/ItalyPowerDemand_TEST"
+DATASET_NAME = "synthetic_control"
+TRAIN_PATH = "data/synthetic_control_TRAIN"
+TEST_PATH = "data/synthetic_control_TEST"
 
 OUTDIR = os.path.join("results", DATASET_NAME)
 FIGDIR = os.path.join(OUTDIR, "figures")
@@ -337,88 +337,88 @@ plot_best_shapelet_alignment(
 )
 
 
-# # =========================================================
-# # ÉTUDE DE CONVERGENCE (PAS DU TUNING)
-# # =========================================================
-# iter_values = [50, 100, 200, 500, 1000, 2000, 3000]
-# acc_iter = []
+# =========================================================
+# ÉTUDE DE CONVERGENCE (PAS DU TUNING)
+# =========================================================
+iter_values = [50, 100, 200, 500, 1000]
+acc_iter = []
 
-# for it in iter_values:
-#     cfg_it = PAPER_CFG.copy()
-#     cfg_it["max_iter"] = it
+for it in iter_values:
+    cfg_it = PAPER_CFG.copy()
+    cfg_it["max_iter"] = it
 
-#     _, _, acc_tmp, _ = run_lts(
-#         X_train_scaled, y_train,
-#         X_test_scaled, y_test,
-#         cfg_it
-#     )
-#     acc_iter.append(acc_tmp)
+    _, _, acc_tmp, _ = run_lts(
+        X_train_scaled, y_train,
+        X_test_scaled, y_test,
+        cfg_it
+    )
+    acc_iter.append(acc_tmp)
 
-# plot_accuracy_vs_iterations(
-#     iter_values,
-#     acc_iter,
-#     os.path.join(FIGDIR, "accuracy_vs_iterations.png")
-# )
-
-
-# # =========================================================
-# # ÉTUDE DE LA TAILLE DES SHAPELETS
-# # =========================================================
-# L_values = [0.1, 0.15, 0.2, 0.25, 0.3]
-# acc_L = []
-
-# for L_val in L_values:
-#     cfg_L = PAPER_CFG.copy()
-#     cfg_L["L_min"] = L_val
-
-#     _, _, acc_tmp, _ = run_lts(
-#         X_train_scaled, y_train,
-#         X_test_scaled, y_test,
-#         cfg_L
-#     )
-#     acc_L.append(acc_tmp)
-
-# plt.figure(figsize=(6, 4))
-# plt.plot(L_values, acc_L, marker="o", linewidth=2)
-# plt.title("Accuracy vs Shapelet Length")
-# plt.xlabel("L_min (fraction of series length)")
-# plt.ylabel("Test Accuracy")
-# plt.grid(alpha=0.3)
-# plt.tight_layout()
-# plt.savefig(os.path.join(FIGDIR, "accuracy_vs_shapelet_length.png"), dpi=300)
-# plt.close()
+plot_accuracy_vs_iterations(
+    iter_values,
+    acc_iter,
+    os.path.join(FIGDIR, "accuracy_vs_iterations.png")
+)
 
 
-# # =========================================================
-# # TABLEAU RÉCAPITULATIF
-# # =========================================================
-# results_df = pd.DataFrame(results).sort_values("accuracy", ascending=False)
+# =========================================================
+# ÉTUDE DE LA TAILLE DES SHAPELETS
+# =========================================================
+L_values = [0.1, 0.15, 0.2, 0.25, 0.3]
+acc_L = []
 
-# print("\n=== Benchmark results ===")
-# print(results_df)
+for L_val in L_values:
+    cfg_L = PAPER_CFG.copy()
+    cfg_L["L_min"] = L_val
 
-# results_df.to_csv(
-#     os.path.join(TABDIR, "benchmark_results.csv"),
-#     index=False
-# )
+    _, _, acc_tmp, _ = run_lts(
+        X_train_scaled, y_train,
+        X_test_scaled, y_test,
+        cfg_L
+    )
+    acc_L.append(acc_tmp)
 
-# with open(os.path.join(LOGDIR, "run_config.json"), "w", encoding="utf-8") as f:
-#     json.dump(
-#         {
-#             "seed": SEED,
-#             "dataset_name": DATASET_NAME,
-#             "train_path": TRAIN_PATH,
-#             "test_path": TEST_PATH,
-#             "paper_cfg": PAPER_CFG,
-#             "iter_values": iter_values,
-#             "L_values": L_values
-#         },
-#         f,
-#         indent=2
-#     )
+plt.figure(figsize=(6, 4))
+plt.plot(L_values, acc_L, marker="o", linewidth=2)
+plt.title("Accuracy vs Shapelet Length")
+plt.xlabel("L_min (fraction of series length)")
+plt.ylabel("Test Accuracy")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.savefig(os.path.join(FIGDIR, "accuracy_vs_shapelet_length.png"), dpi=300)
+plt.close()
 
-# with open(os.path.join(LOGDIR, "classification_report_lts.txt"), "w", encoding="utf-8") as f:
-#     f.write(classification_report(y_test, pred_lts))
 
-# print(f"\nSaved outputs to: {OUTDIR}")
-# print("Done.")
+# =========================================================
+# TABLEAU RÉCAPITULATIF
+# =========================================================
+results_df = pd.DataFrame(results).sort_values("accuracy", ascending=False)
+
+print("\n=== Benchmark results ===")
+print(results_df)
+
+results_df.to_csv(
+    os.path.join(TABDIR, "benchmark_results.csv"),
+    index=False
+)
+
+with open(os.path.join(LOGDIR, "run_config.json"), "w", encoding="utf-8") as f:
+    json.dump(
+        {
+            "seed": SEED,
+            "dataset_name": DATASET_NAME,
+            "train_path": TRAIN_PATH,
+            "test_path": TEST_PATH,
+            "paper_cfg": PAPER_CFG,
+            "iter_values": iter_values,
+            "fractions": fractions
+        },
+        f,
+        indent=2
+    )
+
+with open(os.path.join(LOGDIR, "classification_report_lts.txt"), "w", encoding="utf-8") as f:
+    f.write(classification_report(y_test, pred_lts))
+
+print(f"\nSaved outputs to: {OUTDIR}")
+print("Done.")
